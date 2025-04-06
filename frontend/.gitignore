@@ -1,0 +1,85 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Environment files
+backend/.env
+frontend/.env
+.env
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE and editor files
+.idea/
+.vscode/
+
+# Build directories
+build/
+dist/
+out/
+
+# Dependency directories
+bower_components/
+jspm_packages/
+
+# Coverage reports
+coverage/
+
+# Package distribution files
+*.tgz
+*.tar.gz
+
+# AWS Secrets
+.aws/
+
+# Other temporary files
+*.swp
+*~
+*.bak
+
+# Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
+
+# Java files and other build artifacts
+target/
+*.class
+*.jar
+*.war
+
+# Go binaries
+*.exe
+*.out
+*.test
+
+# JetBrains IDEs (e.g. IntelliJ, PyCharm)
+.idea/
+
+# VS Code settings
+.vscode/
+
+# Expo files (for React Native/Expo)
+.expo/
+.expo-shared/
+
+# Maven wrapper
+.mvn/
+*.mvn/
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# Other editor settings
+*.sublime-workspace
+*.sublime-project
