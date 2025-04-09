@@ -705,10 +705,1171 @@
 
 // export default Dashboard;
 
+// "use client"
+
+// import { useState, useEffect } from "react"
+// import { FaBox, FaUsers, FaExclamationTriangle, FaEye, FaEdit, FaAngleRight } from "react-icons/fa"
+// import { Link } from "react-router-dom"
+// import api from "../../services/api"
+// import {
+//   Chart as ChartJS,
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   LineElement,
+//   BarElement,
+//   ArcElement,
+//   Title,
+//   Tooltip,
+//   Legend,
+// } from "chart.js"
+// import { Line, Doughnut } from "react-chartjs-2"
+// import { useAuth } from "../../context/AuthContext"
+
+// // Register ChartJS components
+// ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend)
+
+// const Dashboard = () => {
+//   const [stats, setStats] = useState({
+//     totalProducts: 0,
+//     availableProducts: 0,
+//     outOfStockProducts: 0,
+//     categories: [],
+//     categoryStats: {},
+//   })
+//   const [loading, setLoading] = useState(true)
+//   const [lowStockProducts, setLowStockProducts] = useState([])
+//   const [recentProducts, setRecentProducts] = useState([])
+//   const [switchingRole, setSwitchingRole] = useState(false)
+//   const { user } = useAuth()
+
+//   useEffect(() => {
+//     const fetchStats = async () => {
+//       try {
+//         setLoading(true)
+//         const response = await api.get("/api/items")
+//         const products = response.data.data
+
+//         // Calculate stats
+//         const availableProducts = products.filter((p) => p.available).length
+//         const outOfStockProducts = products.length - availableProducts
+
+//         // Get unique categories and count products in each
+//         const categories = [...new Set(products.map((p) => p.category))]
+//         const categoryStats = {}
+
+//         categories.forEach((category) => {
+//           categoryStats[category] = products.filter((p) => p.category === category).length
+//         })
+
+//         // Find low stock products (less than 10 items)
+//         const lowStock = products
+//           .filter((p) => p.stock < 10 && p.available)
+//           .sort((a, b) => a.stock - b.stock)
+//           .slice(0, 5)
+
+//         // Get recently added products
+//         const recent = [...products].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5)
+
+//         setStats({
+//           totalProducts: products.length,
+//           availableProducts,
+//           outOfStockProducts,
+//           categories,
+//           categoryStats,
+//         })
+
+//         setLowStockProducts(lowStock)
+//         setRecentProducts(recent)
+//       } catch (error) {
+//         console.error("Error fetching stats:", error)
+//       } finally {
+//         setLoading(false)
+//       }
+//     }
+
+//     fetchStats()
+//   }, [])
+
+//   const handleSwitchRole = async () => {
+//     try {
+//       setSwitchingRole(true)
+//       // For demo purposes - in a real app, you'd have proper role management
+//       await api.post("/api/auth/switch-role")
+//       window.location.reload() // Reload to update auth state
+//     } catch (error) {
+//       console.error("Error switching role:", error)
+//       alert("Failed to switch role")
+//     } finally {
+//       setSwitchingRole(false)
+//     }
+//   }
+
+//   // Sample data for the charts
+//   const salesData = {
+//     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+//     datasets: [
+//       {
+//         label: "Sales",
+//         data: [3500, 4200, 3800, 5100, 4800, 5600, 6200],
+//         borderColor: "rgba(79, 70, 229, 1)",
+//         backgroundColor: "rgba(79, 70, 229, 0.1)",
+//         tension: 0.3,
+//         fill: true,
+//       },
+//     ],
+//   }
+
+//   const categoryData = {
+//     labels: Object.keys(stats.categoryStats),
+//     datasets: [
+//       {
+//         label: "Products by Category",
+//         data: Object.values(stats.categoryStats),
+//         backgroundColor: [
+//           "rgba(79, 70, 229, 0.7)",
+//           "rgba(245, 158, 11, 0.7)",
+//           "rgba(16, 185, 129, 0.7)",
+//           "rgba(239, 68, 68, 0.7)",
+//           "rgba(59, 130, 246, 0.7)",
+//           "rgba(168, 85, 247, 0.7)",
+//         ],
+//         borderWidth: 1,
+//       },
+//     ],
+//   }
+
+//   const ordersData = {
+//     labels: ["Completed", "Processing", "Shipped", "Cancelled"],
+//     datasets: [
+//       {
+//         data: [63, 15, 12, 10],
+//         backgroundColor: [
+//           "rgba(16, 185, 129, 0.7)",
+//           "rgba(245, 158, 11, 0.7)",
+//           "rgba(59, 130, 246, 0.7)",
+//           "rgba(239, 68, 68, 0.7)",
+//         ],
+//         borderWidth: 1,
+//       },
+//     ],
+//   }
+
+//   // Sample data for the recent orders
+//   const recentOrders = [
+//     { id: "ORD-001", customer: "John Doe", date: "2023-08-15", total: 125.99, status: "Completed" },
+//     { id: "ORD-002", customer: "Jane Smith", date: "2023-08-14", total: 89.5, status: "Processing" },
+//     { id: "ORD-003", customer: "Bob Johnson", date: "2023-08-13", total: 210.75, status: "Completed" },
+//     { id: "ORD-004", customer: "Alice Brown", date: "2023-08-12", total: 45.25, status: "Shipped" },
+//     { id: "ORD-005", customer: "Charlie Wilson", date: "2023-08-11", total: 150.0, status: "Completed" },
+//   ]
+
+//   return (
+//     <div className="mt-24 px-4 py-6 animate-fadeIn">
+//       <div className="flex flex-col md:flex-row md:items-center mb-8 justify-between">
+//         <div>
+//           <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+//           <p className="text-gray-600">Welcome back, {user?.username || "Admin"}</p>
+//         </div>
+//         <div className="mt-4 md:mt-0">
+//           <button
+//             onClick={handleSwitchRole}
+//             disabled={switchingRole}
+//             className="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition duration-300 flex items-center"
+//           >
+//             {switchingRole ? "Switching..." : "Switch Role (Admin ↔ User)"}
+//           </button>
+//         </div>
+//       </div>
+
+//       {/* Stats Cards */}
+//       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+//         <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300">
+//           <div className="flex items-center">
+//             <div className="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-4">
+//               <FaBox size={24} />
+//             </div>
+//             <div>
+//               <p className="text-gray-500 text-sm">Total Products</p>
+//               <h3 className="text-2xl font-bold text-gray-800">{loading ? "..." : stats.totalProducts}</h3>
+//             </div>
+//           </div>
+//           <div className="mt-4 text-sm text-indigo-600">
+//             <Link to="/admin/products" className="flex items-center hover:underline">
+//               View all products <FaAngleRight className="ml-1" />
+//             </Link>
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300">
+//           <div className="flex items-center">
+//             <div className="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+//               <FaBox size={24} />
+//             </div>
+//             <div>
+//               <p className="text-gray-500 text-sm">Available Products</p>
+//               <h3 className="text-2xl font-bold text-gray-800">{loading ? "..." : stats.availableProducts}</h3>
+//             </div>
+//           </div>
+//           <div className="mt-4 text-sm text-green-600">
+//             <span className="flex items-center">
+//               {((stats.availableProducts / (stats.totalProducts || 1)) * 100).toFixed(1)}% of total inventory
+//             </span>
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300">
+//           <div className="flex items-center">
+//             <div className="p-3 rounded-full bg-red-100 text-red-600 mr-4">
+//               <FaExclamationTriangle size={24} />
+//             </div>
+//             <div>
+//               <p className="text-gray-500 text-sm">Out of Stock</p>
+//               <h3 className="text-2xl font-bold text-gray-800">{loading ? "..." : stats.outOfStockProducts}</h3>
+//             </div>
+//           </div>
+//           <div className="mt-4 text-sm text-red-600">
+//             <span className="flex items-center">
+//               {((stats.outOfStockProducts / (stats.totalProducts || 1)) * 100).toFixed(1)}% of total inventory
+//             </span>
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300">
+//           <div className="flex items-center">
+//             <div className="p-3 rounded-full bg-amber-100 text-amber-600 mr-4">
+//               <FaUsers size={24} />
+//             </div>
+//             <div>
+//               <p className="text-gray-500 text-sm">Total Customers</p>
+//               <h3 className="text-2xl font-bold text-gray-800">254</h3>
+//             </div>
+//           </div>
+//           <div className="mt-4 text-sm text-amber-600">
+//             <span className="flex items-center">28 new this month</span>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Charts Row */}
+//       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+//         <div className="bg-white rounded-xl shadow-sm p-6 col-span-2">
+//           <div className="flex justify-between items-center mb-4">
+//             <h2 className="text-lg font-semibold text-gray-800">Sales Overview</h2>
+//             <select className="text-sm border rounded-lg p-2">
+//               <option>Last 7 days</option>
+//               <option>Last 30 days</option>
+//               <option>Last 90 days</option>
+//               <option>Last year</option>
+//             </select>
+//           </div>
+//           <div className="h-80">
+//             <Line
+//               data={salesData}
+//               options={{
+//                 responsive: true,
+//                 maintainAspectRatio: false,
+//                 plugins: {
+//                   legend: {
+//                     display: false,
+//                   },
+//                 },
+//                 scales: {
+//                   y: {
+//                     beginAtZero: true,
+//                     grid: {
+//                       color: "rgba(0, 0, 0, 0.05)",
+//                     },
+//                   },
+//                   x: {
+//                     grid: {
+//                       display: false,
+//                     },
+//                   },
+//                 },
+//               }}
+//             />
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-xl shadow-sm p-6">
+//           <h2 className="text-lg font-semibold text-gray-800 mb-4">Product Categories</h2>
+//           <div className="h-80">
+//             <Doughnut
+//               data={categoryData}
+//               options={{
+//                 responsive: true,
+//                 maintainAspectRatio: false,
+//                 plugins: {
+//                   legend: {
+//                     position: "bottom",
+//                     labels: {
+//                       boxWidth: 12,
+//                       padding: 15,
+//                     },
+//                   },
+//                 },
+//                 cutout: "70%",
+//               }}
+//             />
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Second Row */}
+//       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+//         {/* Recent Orders */}
+//         <div className="bg-white rounded-xl shadow-sm overflow-hidden lg:col-span-2">
+//           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+//             <h2 className="text-lg font-semibold text-gray-800">Recent Orders</h2>
+//           </div>
+//           <div className="overflow-x-auto">
+//             <table className="min-w-full divide-y divide-gray-200">
+//               <thead className="bg-gray-50">
+//                 <tr>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Order ID
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Customer
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Date
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Total
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Status
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Actions
+//                   </th>
+//                 </tr>
+//               </thead>
+//               <tbody className="bg-white divide-y divide-gray-200">
+//                 {recentOrders.map((order) => (
+//                   <tr key={order.id} className="hover:bg-gray-50">
+//                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.id}</td>
+//                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.customer}</td>
+//                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.date}</td>
+//                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.total.toFixed(2)}</td>
+//                     <td className="px-6 py-4 whitespace-nowrap">
+//                       <span
+//                         className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+//                         ${
+//                           order.status === "Completed"
+//                             ? "bg-green-100 text-green-800"
+//                             : order.status === "Processing"
+//                               ? "bg-amber-100 text-amber-800"
+//                               : order.status === "Shipped"
+//                                 ? "bg-blue-100 text-blue-800"
+//                                 : "bg-red-100 text-red-800"
+//                         }`}
+//                       >
+//                         {order.status}
+//                       </span>
+//                     </td>
+//                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+//                       <button className="text-indigo-600 hover:text-indigo-900 mr-3">
+//                         <FaEye size={16} />
+//                       </button>
+//                       <button className="text-indigo-600 hover:text-indigo-900">
+//                         <FaEdit size={16} />
+//                       </button>
+//                     </td>
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+//           <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 flex justify-center">
+//             <button className="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center">
+//               View all orders <FaAngleRight className="ml-1" />
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Order Status */}
+//         <div className="bg-white rounded-xl shadow-sm p-6">
+//           <h2 className="text-lg font-semibold text-gray-800 mb-4">Order Status</h2>
+//           <div className="h-52 mb-4">
+//             <Doughnut
+//               data={ordersData}
+//               options={{
+//                 responsive: true,
+//                 maintainAspectRatio: false,
+//                 plugins: {
+//                   legend: {
+//                     position: "right",
+//                     labels: {
+//                       boxWidth: 12,
+//                       padding: 15,
+//                     },
+//                   },
+//                 },
+//                 cutout: "70%",
+//               }}
+//             />
+//           </div>
+//           <div className="space-y-2 text-sm text-gray-600">
+//             <div className="flex justify-between">
+//               <span>Completed Orders:</span>
+//               <span className="font-medium">63</span>
+//             </div>
+//             <div className="flex justify-between">
+//               <span>Processing Orders:</span>
+//               <span className="font-medium">15</span>
+//             </div>
+//             <div className="flex justify-between">
+//               <span>Shipped Orders:</span>
+//               <span className="font-medium">12</span>
+//             </div>
+//             <div className="flex justify-between">
+//               <span>Cancelled Orders:</span>
+//               <span className="font-medium">10</span>
+//             </div>
+//             <div className="flex justify-between font-semibold pt-2 border-t">
+//               <span>Total Orders:</span>
+//               <span>100</span>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Low Stock Products & Recent Additions */}
+//       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+//         {/* Low Stock Products */}
+//         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+//           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+//             <h2 className="text-lg font-semibold text-gray-800">Low Stock Products</h2>
+//             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+//               Attention Needed
+//             </span>
+//           </div>
+//           {lowStockProducts.length > 0 ? (
+//             <div className="divide-y divide-gray-200">
+//               {lowStockProducts.map((product) => (
+//                 <div key={product._id} className="p-4 hover:bg-gray-50 flex items-center justify-between">
+//                   <div className="flex items-center">
+//                     <div className="h-10 w-10 flex-shrink-0">
+//                       {product.imageUrl ? (
+//                         <img
+//                           src={product.imageUrl || "/placeholder.svg"}
+//                           alt={product.title}
+//                           className="h-10 w-10 rounded-md object-cover"
+//                         />
+//                       ) : (
+//                         <div className="h-10 w-10 rounded-md bg-gray-200 flex items-center justify-center">
+//                           <span className="text-xs text-gray-500">No img</span>
+//                         </div>
+//                       )}
+//                     </div>
+//                     <div className="ml-4">
+//                       <h3 className="text-sm font-medium text-gray-900 line-clamp-1">{product.title}</h3>
+//                       <p className="text-xs text-gray-500">Category: {product.category}</p>
+//                     </div>
+//                   </div>
+//                   <div className="flex items-center">
+//                     <span
+//                       className={`px-2 py-1 rounded-md text-xs font-medium ${
+//                         product.stock <= 5 ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"
+//                       }`}
+//                     >
+//                       {product.stock} left in stock
+//                     </span>
+//                     <Link
+//                       to={`/admin/products/edit/${product._id}`}
+//                       className="ml-4 text-indigo-600 hover:text-indigo-900"
+//                     >
+//                       <FaEdit size={16} />
+//                     </Link>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+//           ) : (
+//             <div className="p-6 text-center text-gray-500">No low stock products found.</div>
+//           )}
+//           {lowStockProducts.length > 0 && (
+//             <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 flex justify-center">
+//               <Link
+//                 to="/admin/products"
+//                 className="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center"
+//               >
+//                 Manage inventory <FaAngleRight className="ml-1" />
+//               </Link>
+//             </div>
+//           )}
+//         </div>
+
+//         {/* Recent Products */}
+//         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+//           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+//             <h2 className="text-lg font-semibold text-gray-800">Recently Added Products</h2>
+//           </div>
+//           {recentProducts.length > 0 ? (
+//             <div className="divide-y divide-gray-200">
+//               {recentProducts.map((product) => (
+//                 <div key={product._id} className="p-4 hover:bg-gray-50 flex items-center justify-between">
+//                   <div className="flex items-center">
+//                     <div className="h-10 w-10 flex-shrink-0">
+//                       {product.imageUrl ? (
+//                         <img
+//                           src={product.imageUrl || "/placeholder.svg"}
+//                           alt={product.title}
+//                           className="h-10 w-10 rounded-md object-cover"
+//                         />
+//                       ) : (
+//                         <div className="h-10 w-10 rounded-md bg-gray-200 flex items-center justify-center">
+//                           <span className="text-xs text-gray-500">No img</span>
+//                         </div>
+//                       )}
+//                     </div>
+//                     <div className="ml-4">
+//                       <h3 className="text-sm font-medium text-gray-900 line-clamp-1">{product.title}</h3>
+//                       <p className="text-xs text-gray-500">
+//                         ${product.price.toFixed(2)} - {product.category}
+//                       </p>
+//                     </div>
+//                   </div>
+//                   <div className="flex space-x-2">
+//                     <Link to={`/products/${product._id}`} className="text-indigo-600 hover:text-indigo-900">
+//                       <FaEye size={16} />
+//                     </Link>
+//                     <Link to={`/admin/products/edit/${product._id}`} className="text-indigo-600 hover:text-indigo-900">
+//                       <FaEdit size={16} />
+//                     </Link>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+//           ) : (
+//             <div className="p-6 text-center text-gray-500">No products found.</div>
+//           )}
+//           {recentProducts.length > 0 && (
+//             <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 flex justify-center">
+//               <Link
+//                 to="/admin/products/add"
+//                 className="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center"
+//               >
+//                 Add new product <FaAngleRight className="ml-1" />
+//               </Link>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default Dashboard
+
+// "use client"
+
+// import { useState, useEffect } from "react"
+// import {
+//   FaBox,
+//   FaUsers,
+//   FaExclamationTriangle,
+//   FaEye,
+//   FaEdit,
+//   FaAngleRight,
+//   FaGraduationCap,
+//   FaPlus,
+// } from "react-icons/fa"
+// import { Link } from "react-router-dom"
+// import api from "../../services/api"
+// import {
+//   Chart as ChartJS,
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   LineElement,
+//   BarElement,
+//   ArcElement,
+//   Title,
+//   Tooltip,
+//   Legend,
+// } from "chart.js"
+// import { Line, Doughnut } from "react-chartjs-2"
+// import { useAuth } from "../../context/AuthContext"
+
+// // Register ChartJS components
+// ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend)
+
+// const Dashboard = () => {
+//   const [stats, setStats] = useState({
+//     totalProducts: 0,
+//     availableProducts: 0,
+//     outOfStockProducts: 0,
+//     categories: [],
+//     categoryStats: {},
+//   })
+//   const [courseStats, setCourseStats] = useState({
+//     totalCourses: 0,
+//     featuredCourses: 0,
+//     categories: [],
+//     categoryStats: {},
+//   })
+//   const [loading, setLoading] = useState(true)
+//   const [lowStockProducts, setLowStockProducts] = useState([])
+//   const [recentProducts, setRecentProducts] = useState([])
+//   const [recentCourses, setRecentCourses] = useState([])
+//   const [switchingRole, setSwitchingRole] = useState(false)
+//   const { user } = useAuth()
+
+//   useEffect(() => {
+//     const fetchStats = async () => {
+//       try {
+//         setLoading(true)
+
+//         // Fetch products
+//         const productsResponse = await api.get("/api/items")
+//         const products = productsResponse.data.data
+
+//         // Calculate product stats
+//         const availableProducts = products.filter((p) => p.available).length
+//         const outOfStockProducts = products.length - availableProducts
+
+//         // Get unique product categories and count products in each
+//         const productCategories = [...new Set(products.map((p) => p.category))]
+//         const productCategoryStats = {}
+
+//         productCategories.forEach((category) => {
+//           productCategoryStats[category] = products.filter((p) => p.category === category).length
+//         })
+
+//         // Find low stock products (less than 10 items)
+//         const lowStock = products
+//           .filter((p) => p.stock < 10 && p.available)
+//           .sort((a, b) => a.stock - b.stock)
+//           .slice(0, 5)
+
+//         // Get recently added products
+//         const recentProductsList = [...products]
+//           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+//           .slice(0, 5)
+
+//         setStats({
+//           totalProducts: products.length,
+//           availableProducts,
+//           outOfStockProducts,
+//           categories: productCategories,
+//           categoryStats: productCategoryStats,
+//         })
+
+//         setLowStockProducts(lowStock)
+//         setRecentProducts(recentProductsList)
+
+//         // Fetch courses
+//         const coursesResponse = await api.get("/api/courses")
+//         const courses = coursesResponse.data.data
+
+//         // Calculate course stats
+//         const featuredCourses = courses.filter((c) => c.featured).length
+
+//         // Get unique course categories and count courses in each
+//         const courseCategories = [...new Set(courses.map((c) => c.category))]
+//         const courseCategoryStats = {}
+
+//         courseCategories.forEach((category) => {
+//           courseCategoryStats[category] = courses.filter((c) => c.category === category).length
+//         })
+
+//         // Get recently added courses
+//         const recentCoursesList = [...courses].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5)
+
+//         setCourseStats({
+//           totalCourses: courses.length,
+//           featuredCourses,
+//           categories: courseCategories,
+//           categoryStats: courseCategoryStats,
+//         })
+
+//         setRecentCourses(recentCoursesList)
+//       } catch (error) {
+//         console.error("Error fetching stats:", error)
+//       } finally {
+//         setLoading(false)
+//       }
+//     }
+
+//     fetchStats()
+//   }, [])
+
+//   const handleSwitchRole = async () => {
+//     try {
+//       setSwitchingRole(true)
+//       // For demo purposes - in a real app, you'd have proper role management
+//       await api.post("/api/auth/switch-role")
+//       window.location.reload() // Reload to update auth state
+//     } catch (error) {
+//       console.error("Error switching role:", error)
+//       alert("Failed to switch role")
+//     } finally {
+//       setSwitchingRole(false)
+//     }
+//   }
+
+//   // Sample data for the charts
+//   const salesData = {
+//     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+//     datasets: [
+//       {
+//         label: "Sales",
+//         data: [3500, 4200, 3800, 5100, 4800, 5600, 6200],
+//         borderColor: "rgba(79, 70, 229, 1)",
+//         backgroundColor: "rgba(79, 70, 229, 0.1)",
+//         tension: 0.3,
+//         fill: true,
+//       },
+//     ],
+//   }
+
+//   const productCategoryData = {
+//     labels: Object.keys(stats.categoryStats),
+//     datasets: [
+//       {
+//         label: "Products by Category",
+//         data: Object.values(stats.categoryStats),
+//         backgroundColor: [
+//           "rgba(79, 70, 229, 0.7)",
+//           "rgba(245, 158, 11, 0.7)",
+//           "rgba(16, 185, 129, 0.7)",
+//           "rgba(239, 68, 68, 0.7)",
+//           "rgba(59, 130, 246, 0.7)",
+//           "rgba(168, 85, 247, 0.7)",
+//         ],
+//         borderWidth: 1,
+//       },
+//     ],
+//   }
+
+//   const courseCategoryData = {
+//     labels: Object.keys(courseStats.categoryStats),
+//     datasets: [
+//       {
+//         label: "Courses by Category",
+//         data: Object.values(courseStats.categoryStats),
+//         backgroundColor: [
+//           "rgba(16, 185, 129, 0.7)",
+//           "rgba(245, 158, 11, 0.7)",
+//           "rgba(79, 70, 229, 0.7)",
+//           "rgba(239, 68, 68, 0.7)",
+//           "rgba(59, 130, 246, 0.7)",
+//         ],
+//         borderWidth: 1,
+//       },
+//     ],
+//   }
+
+//   const ordersData = {
+//     labels: ["Completed", "Processing", "Shipped", "Cancelled"],
+//     datasets: [
+//       {
+//         data: [63, 15, 12, 10],
+//         backgroundColor: [
+//           "rgba(16, 185, 129, 0.7)",
+//           "rgba(245, 158, 11, 0.7)",
+//           "rgba(59, 130, 246, 0.7)",
+//           "rgba(239, 68, 68, 0.7)",
+//         ],
+//         borderWidth: 1,
+//       },
+//     ],
+//   }
+
+//   // Sample data for the recent orders
+//   const recentOrders = [
+//     { id: "ORD-001", customer: "John Doe", date: "2023-08-15", total: 125.99, status: "Completed" },
+//     { id: "ORD-002", customer: "Jane Smith", date: "2023-08-14", total: 89.5, status: "Processing" },
+//     { id: "ORD-003", customer: "Bob Johnson", date: "2023-08-13", total: 210.75, status: "Completed" },
+//     { id: "ORD-004", customer: "Alice Brown", date: "2023-08-12", total: 45.25, status: "Shipped" },
+//     { id: "ORD-005", customer: "Charlie Wilson", date: "2023-08-11", total: 150.0, status: "Completed" },
+//   ]
+
+//   return (
+//     <div className="mt-24 px-4 py-6 animate-fadeIn">
+//       <div className="flex flex-col md:flex-row md:items-center mb-8 justify-between">
+//         <div>
+//           <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+//           <p className="text-gray-600">Welcome back, {user?.username || "Admin"}</p>
+//         </div>
+//         <div className="mt-4 md:mt-0">
+//           <button
+//             onClick={handleSwitchRole}
+//             disabled={switchingRole}
+//             className="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition duration-300 flex items-center"
+//           >
+//             {switchingRole ? "Switching..." : "Switch Role (Admin ↔ User)"}
+//           </button>
+//         </div>
+//       </div>
+
+//       {/* Stats Cards */}
+//       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+//         <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300">
+//           <div className="flex items-center">
+//             <div className="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-4">
+//               <FaBox size={24} />
+//             </div>
+//             <div>
+//               <p className="text-gray-500 text-sm">Total Products</p>
+//               <h3 className="text-2xl font-bold text-gray-800">{loading ? "..." : stats.totalProducts}</h3>
+//             </div>
+//           </div>
+//           <div className="mt-4 text-sm text-indigo-600">
+//             <Link to="/admin/products" className="flex items-center hover:underline">
+//               View all products <FaAngleRight className="ml-1" />
+//             </Link>
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300">
+//           <div className="flex items-center">
+//             <div className="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+//               <FaGraduationCap size={24} />
+//             </div>
+//             <div>
+//               <p className="text-gray-500 text-sm">Total Courses</p>
+//               <h3 className="text-2xl font-bold text-gray-800">{loading ? "..." : courseStats.totalCourses}</h3>
+//             </div>
+//           </div>
+//           <div className="mt-4 text-sm text-green-600">
+//             <Link to="/admin/courses" className="flex items-center hover:underline">
+//               View all courses <FaAngleRight className="ml-1" />
+//             </Link>
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300">
+//           <div className="flex items-center">
+//             <div className="p-3 rounded-full bg-red-100 text-red-600 mr-4">
+//               <FaExclamationTriangle size={24} />
+//             </div>
+//             <div>
+//               <p className="text-gray-500 text-sm">Out of Stock</p>
+//               <h3 className="text-2xl font-bold text-gray-800">{loading ? "..." : stats.outOfStockProducts}</h3>
+//             </div>
+//           </div>
+//           <div className="mt-4 text-sm text-red-600">
+//             <span className="flex items-center">
+//               {((stats.outOfStockProducts / (stats.totalProducts || 1)) * 100).toFixed(1)}% of total inventory
+//             </span>
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300">
+//           <div className="flex items-center">
+//             <div className="p-3 rounded-full bg-amber-100 text-amber-600 mr-4">
+//               <FaUsers size={24} />
+//             </div>
+//             <div>
+//               <p className="text-gray-500 text-sm">Total Customers</p>
+//               <h3 className="text-2xl font-bold text-gray-800">254</h3>
+//             </div>
+//           </div>
+//           <div className="mt-4 text-sm text-amber-600">
+//             <span className="flex items-center">28 new this month</span>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Charts Row */}
+//       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+//         <div className="bg-white rounded-xl shadow-sm p-6 col-span-2">
+//           <div className="flex justify-between items-center mb-4">
+//             <h2 className="text-lg font-semibold text-gray-800">Sales Overview</h2>
+//             <select className="text-sm border rounded-lg p-2">
+//               <option>Last 7 days</option>
+//               <option>Last 30 days</option>
+//               <option>Last 90 days</option>
+//               <option>Last year</option>
+//             </select>
+//           </div>
+//           <div className="h-80">
+//             <Line
+//               data={salesData}
+//               options={{
+//                 responsive: true,
+//                 maintainAspectRatio: false,
+//                 plugins: {
+//                   legend: {
+//                     display: false,
+//                   },
+//                 },
+//                 scales: {
+//                   y: {
+//                     beginAtZero: true,
+//                     grid: {
+//                       color: "rgba(0, 0, 0, 0.05)",
+//                     },
+//                   },
+//                   x: {
+//                     grid: {
+//                       display: false,
+//                     },
+//                   },
+//                 },
+//               }}
+//             />
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-xl shadow-sm p-6">
+//           <h2 className="text-lg font-semibold text-gray-800 mb-4">Product Categories</h2>
+//           <div className="h-80">
+//             <Doughnut
+//               data={productCategoryData}
+//               options={{
+//                 responsive: true,
+//                 maintainAspectRatio: false,
+//                 plugins: {
+//                   legend: {
+//                     position: "bottom",
+//                     labels: {
+//                       boxWidth: 12,
+//                       padding: 15,
+//                     },
+//                   },
+//                 },
+//                 cutout: "70%",
+//               }}
+//             />
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Course Categories and Recent Orders */}
+//       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+//         <div className="bg-white rounded-xl shadow-sm p-6">
+//           <h2 className="text-lg font-semibold text-gray-800 mb-4">Course Categories</h2>
+//           <div className="h-80">
+//             <Doughnut
+//               data={courseCategoryData}
+//               options={{
+//                 responsive: true,
+//                 maintainAspectRatio: false,
+//                 plugins: {
+//                   legend: {
+//                     position: "bottom",
+//                     labels: {
+//                       boxWidth: 12,
+//                       padding: 15,
+//                     },
+//                   },
+//                 },
+//                 cutout: "70%",
+//               }}
+//             />
+//           </div>
+//         </div>
+
+//         {/* Recent Orders */}
+//         <div className="bg-white rounded-xl shadow-sm overflow-hidden lg:col-span-2">
+//           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+//             <h2 className="text-lg font-semibold text-gray-800">Recent Orders</h2>
+//           </div>
+//           <div className="overflow-x-auto">
+//             <table className="min-w-full divide-y divide-gray-200">
+//               <thead className="bg-gray-50">
+//                 <tr>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Order ID
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Customer
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Date
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Total
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Status
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Actions
+//                   </th>
+//                 </tr>
+//               </thead>
+//               <tbody className="bg-white divide-y divide-gray-200">
+//                 {recentOrders.map((order) => (
+//                   <tr key={order.id} className="hover:bg-gray-50">
+//                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.id}</td>
+//                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.customer}</td>
+//                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.date}</td>
+//                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.total.toFixed(2)}</td>
+//                     <td className="px-6 py-4 whitespace-nowrap">
+//                       <span
+//                         className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+//                         ${
+//                           order.status === "Completed"
+//                             ? "bg-green-100 text-green-800"
+//                             : order.status === "Processing"
+//                               ? "bg-amber-100 text-amber-800"
+//                               : order.status === "Shipped"
+//                                 ? "bg-blue-100 text-blue-800"
+//                                 : "bg-red-100 text-red-800"
+//                         }`}
+//                       >
+//                         {order.status}
+//                       </span>
+//                     </td>
+//                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+//                       <button className="text-indigo-600 hover:text-indigo-900 mr-3">
+//                         <FaEye size={16} />
+//                       </button>
+//                       <button className="text-indigo-600 hover:text-indigo-900">
+//                         <FaEdit size={16} />
+//                       </button>
+//                     </td>
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+//           <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 flex justify-center">
+//             <button className="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center">
+//               View all orders <FaAngleRight className="ml-1" />
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Recent Products & Courses */}
+//       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+//         {/* Recent Products */}
+//         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+//           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+//             <h2 className="text-lg font-semibold text-gray-800">Recently Added Products</h2>
+//             <Link to="/admin/products/add" className="text-indigo-600 hover:text-indigo-900 flex items-center text-sm">
+//               <FaPlus className="mr-1" /> Add Product
+//             </Link>
+//           </div>
+//           {recentProducts.length > 0 ? (
+//             <div className="divide-y divide-gray-200">
+//               {recentProducts.map((product) => (
+//                 <div key={product._id} className="p-4 hover:bg-gray-50 flex items-center justify-between">
+//                   <div className="flex items-center">
+//                     <div className="h-10 w-10 flex-shrink-0">
+//                       {product.imageUrl ? (
+//                         <img
+//                           src={product.imageUrl || "/placeholder.svg"}
+//                           alt={product.title}
+//                           className="h-10 w-10 rounded-md object-cover"
+//                         />
+//                       ) : (
+//                         <div className="h-10 w-10 rounded-md bg-gray-200 flex items-center justify-center">
+//                           <span className="text-xs text-gray-500">No img</span>
+//                         </div>
+//                       )}
+//                     </div>
+//                     <div className="ml-4">
+//                       <h3 className="text-sm font-medium text-gray-900 line-clamp-1">{product.title}</h3>
+//                       <p className="text-xs text-gray-500">
+//                         ${product.price.toFixed(2)} - {product.category}
+//                       </p>
+//                     </div>
+//                   </div>
+//                   <div className="flex space-x-2">
+//                     <Link to={`/products/${product._id}`} className="text-indigo-600 hover:text-indigo-900">
+//                       <FaEye size={16} />
+//                     </Link>
+//                     <Link to={`/admin/products/edit/${product._id}`} className="text-indigo-600 hover:text-indigo-900">
+//                       <FaEdit size={16} />
+//                     </Link>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+//           ) : (
+//             <div className="p-6 text-center text-gray-500">No products found.</div>
+//           )}
+//         </div>
+
+//         {/* Recent Courses */}
+//         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+//           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+//             <h2 className="text-lg font-semibold text-gray-800">Recently Added Courses</h2>
+//             <Link to="/admin/courses/add" className="text-indigo-600 hover:text-indigo-900 flex items-center text-sm">
+//               <FaPlus className="mr-1" /> Add Course
+//             </Link>
+//           </div>
+//           {recentCourses.length > 0 ? (
+//             <div className="divide-y divide-gray-200">
+//               {recentCourses.map((course) => (
+//                 <div key={course._id} className="p-4 hover:bg-gray-50 flex items-center justify-between">
+//                   <div className="flex items-center">
+//                     <div className="h-10 w-10 flex-shrink-0">
+//                       {course.imageUrl ? (
+//                         <img
+//                           src={course.imageUrl || "/placeholder.svg"}
+//                           alt={course.title}
+//                           className="h-10 w-10 rounded-md object-cover"
+//                         />
+//                       ) : (
+//                         <div className="h-10 w-10 rounded-md bg-indigo-100 flex items-center justify-center">
+//                           <FaGraduationCap className="text-indigo-600" />
+//                         </div>
+//                       )}
+//                     </div>
+//                     <div className="ml-4">
+//                       <h3 className="text-sm font-medium text-gray-900 line-clamp-1">{course.title}</h3>
+//                       <p className="text-xs text-gray-500">
+//                         ${course.price.toFixed(2)} - {course.category}
+//                       </p>
+//                     </div>
+//                   </div>
+//                   <div className="flex space-x-2">
+//                     <Link to={`/courses/${course._id}`} className="text-indigo-600 hover:text-indigo-900">
+//                       <FaEye size={16} />
+//                     </Link>
+//                     <Link to={`/admin/courses/edit/${course._id}`} className="text-indigo-600 hover:text-indigo-900">
+//                       <FaEdit size={16} />
+//                     </Link>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+//           ) : (
+//             <div className="p-6 text-center text-gray-500">No courses found.</div>
+//           )}
+//           {recentCourses.length > 0 && (
+//             <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 flex justify-center">
+//               <Link
+//                 to="/admin/courses"
+//                 className="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center"
+//               >
+//                 View all courses <FaAngleRight className="ml-1" />
+//               </Link>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default Dashboard
+
 "use client"
 
 import { useState, useEffect } from "react"
-import { FaBox, FaUsers, FaExclamationTriangle, FaEye, FaEdit, FaAngleRight } from "react-icons/fa"
+import {
+  FaBox,
+  FaUsers,
+  FaExclamationTriangle,
+  FaEye,
+  FaEdit,
+  FaAngleRight,
+  FaGraduationCap,
+  FaPlus,
+  FaShoppingCart,
+  FaUserCog,
+} from "react-icons/fa"
 import { Link } from "react-router-dom"
 import api from "../../services/api"
 import {
@@ -725,6 +1886,7 @@ import {
 } from "chart.js"
 import { Line, Doughnut } from "react-chartjs-2"
 import { useAuth } from "../../context/AuthContext"
+import LoadingSpinner from "../../components/common/LoadingSpinner"
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend)
@@ -737,29 +1899,37 @@ const Dashboard = () => {
     categories: [],
     categoryStats: {},
   })
+  const [courseStats, setCourseStats] = useState({
+    totalCourses: 0,
+    featuredCourses: 0,
+    categories: [],
+    categoryStats: {},
+  })
   const [loading, setLoading] = useState(true)
   const [lowStockProducts, setLowStockProducts] = useState([])
   const [recentProducts, setRecentProducts] = useState([])
-  const [switchingRole, setSwitchingRole] = useState(false)
+  const [recentCourses, setRecentCourses] = useState([])
   const { user } = useAuth()
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setLoading(true)
-        const response = await api.get("/api/items")
-        const products = response.data.data
 
-        // Calculate stats
+        // Fetch products
+        const productsResponse = await api.get("/api/items")
+        const products = productsResponse.data.data
+
+        // Calculate product stats
         const availableProducts = products.filter((p) => p.available).length
         const outOfStockProducts = products.length - availableProducts
 
-        // Get unique categories and count products in each
-        const categories = [...new Set(products.map((p) => p.category))]
-        const categoryStats = {}
+        // Get unique product categories and count products in each
+        const productCategories = [...new Set(products.map((p) => p.category))]
+        const productCategoryStats = {}
 
-        categories.forEach((category) => {
-          categoryStats[category] = products.filter((p) => p.category === category).length
+        productCategories.forEach((category) => {
+          productCategoryStats[category] = products.filter((p) => p.category === category).length
         })
 
         // Find low stock products (less than 10 items)
@@ -769,18 +1939,47 @@ const Dashboard = () => {
           .slice(0, 5)
 
         // Get recently added products
-        const recent = [...products].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5)
+        const recentProductsList = [...products]
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 5)
 
         setStats({
           totalProducts: products.length,
           availableProducts,
           outOfStockProducts,
-          categories,
-          categoryStats,
+          categories: productCategories,
+          categoryStats: productCategoryStats,
         })
 
         setLowStockProducts(lowStock)
-        setRecentProducts(recent)
+        setRecentProducts(recentProductsList)
+
+        // Fetch courses
+        const coursesResponse = await api.get("/api/courses")
+        const courses = coursesResponse.data.data
+
+        // Calculate course stats
+        const featuredCourses = courses.filter((c) => c.featured).length
+
+        // Get unique course categories and count courses in each
+        const courseCategories = [...new Set(courses.map((c) => c.category))]
+        const courseCategoryStats = {}
+
+        courseCategories.forEach((category) => {
+          courseCategoryStats[category] = courses.filter((c) => c.category === category).length
+        })
+
+        // Get recently added courses
+        const recentCoursesList = [...courses].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5)
+
+        setCourseStats({
+          totalCourses: courses.length,
+          featuredCourses,
+          categories: courseCategories,
+          categoryStats: courseCategoryStats,
+        })
+
+        setRecentCourses(recentCoursesList)
       } catch (error) {
         console.error("Error fetching stats:", error)
       } finally {
@@ -790,20 +1989,6 @@ const Dashboard = () => {
 
     fetchStats()
   }, [])
-
-  const handleSwitchRole = async () => {
-    try {
-      setSwitchingRole(true)
-      // For demo purposes - in a real app, you'd have proper role management
-      await api.post("/api/auth/switch-role")
-      window.location.reload() // Reload to update auth state
-    } catch (error) {
-      console.error("Error switching role:", error)
-      alert("Failed to switch role")
-    } finally {
-      setSwitchingRole(false)
-    }
-  }
 
   // Sample data for the charts
   const salesData = {
@@ -820,7 +2005,7 @@ const Dashboard = () => {
     ],
   }
 
-  const categoryData = {
+  const productCategoryData = {
     labels: Object.keys(stats.categoryStats),
     datasets: [
       {
@@ -839,16 +2024,18 @@ const Dashboard = () => {
     ],
   }
 
-  const ordersData = {
-    labels: ["Completed", "Processing", "Shipped", "Cancelled"],
+  const courseCategoryData = {
+    labels: Object.keys(courseStats.categoryStats),
     datasets: [
       {
-        data: [63, 15, 12, 10],
+        label: "Courses by Category",
+        data: Object.values(courseStats.categoryStats),
         backgroundColor: [
           "rgba(16, 185, 129, 0.7)",
           "rgba(245, 158, 11, 0.7)",
-          "rgba(59, 130, 246, 0.7)",
+          "rgba(79, 70, 229, 0.7)",
           "rgba(239, 68, 68, 0.7)",
+          "rgba(59, 130, 246, 0.7)",
         ],
         borderWidth: 1,
       },
@@ -864,22 +2051,84 @@ const Dashboard = () => {
     { id: "ORD-005", customer: "Charlie Wilson", date: "2023-08-11", total: 150.0, status: "Completed" },
   ]
 
+  if (loading) return <LoadingSpinner />
+
   return (
-    <div className="mt-24 px-4 py-6 animate-fadeIn">
+    <div className="container mx-auto px-4 py-8 mt-20 animate-fadeIn">
       <div className="flex flex-col md:flex-row md:items-center mb-8 justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
           <p className="text-gray-600">Welcome back, {user?.username || "Admin"}</p>
         </div>
-        <div className="mt-4 md:mt-0">
-          <button
-            onClick={handleSwitchRole}
-            disabled={switchingRole}
-            className="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition duration-300 flex items-center"
+        <div className="mt-4 md:mt-0 flex space-x-3">
+          <Link
+            to="/admin/products/add"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition duration-300 flex items-center"
           >
-            {switchingRole ? "Switching..." : "Switch Role (Admin ↔ User)"}
-          </button>
+            <FaPlus className="mr-2" /> Add Product
+          </Link>
+          <Link
+            to="/admin/courses/add"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300 flex items-center"
+          >
+            <FaPlus className="mr-2" /> Add Course
+          </Link>
         </div>
+      </div>
+
+      {/* Admin Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <Link
+          to="/admin/products"
+          className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300 flex items-center"
+        >
+          <div className="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-4">
+            <FaBox size={24} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800">Manage Products</h3>
+            <p className="text-sm text-gray-500">Add, edit, delete products</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/admin/courses"
+          className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300 flex items-center"
+        >
+          <div className="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+            <FaGraduationCap size={24} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800">Manage Courses</h3>
+            <p className="text-sm text-gray-500">Add, edit, delete courses</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/admin/orders"
+          className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300 flex items-center"
+        >
+          <div className="p-3 rounded-full bg-amber-100 text-amber-600 mr-4">
+            <FaShoppingCart size={24} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800">Manage Orders</h3>
+            <p className="text-sm text-gray-500">View and process orders</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/admin/users"
+          className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300 flex items-center"
+        >
+          <div className="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+            <FaUserCog size={24} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800">Manage Users</h3>
+            <p className="text-sm text-gray-500">View and manage user accounts</p>
+          </div>
+        </Link>
       </div>
 
       {/* Stats Cards */}
@@ -891,7 +2140,7 @@ const Dashboard = () => {
             </div>
             <div>
               <p className="text-gray-500 text-sm">Total Products</p>
-              <h3 className="text-2xl font-bold text-gray-800">{loading ? "..." : stats.totalProducts}</h3>
+              <h3 className="text-2xl font-bold text-gray-800">{stats.totalProducts}</h3>
             </div>
           </div>
           <div className="mt-4 text-sm text-indigo-600">
@@ -904,17 +2153,17 @@ const Dashboard = () => {
         <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-green-100 text-green-600 mr-4">
-              <FaBox size={24} />
+              <FaGraduationCap size={24} />
             </div>
             <div>
-              <p className="text-gray-500 text-sm">Available Products</p>
-              <h3 className="text-2xl font-bold text-gray-800">{loading ? "..." : stats.availableProducts}</h3>
+              <p className="text-gray-500 text-sm">Total Courses</p>
+              <h3 className="text-2xl font-bold text-gray-800">{courseStats.totalCourses}</h3>
             </div>
           </div>
           <div className="mt-4 text-sm text-green-600">
-            <span className="flex items-center">
-              {((stats.availableProducts / (stats.totalProducts || 1)) * 100).toFixed(1)}% of total inventory
-            </span>
+            <Link to="/admin/courses" className="flex items-center hover:underline">
+              View all courses <FaAngleRight className="ml-1" />
+            </Link>
           </div>
         </div>
 
@@ -925,7 +2174,7 @@ const Dashboard = () => {
             </div>
             <div>
               <p className="text-gray-500 text-sm">Out of Stock</p>
-              <h3 className="text-2xl font-bold text-gray-800">{loading ? "..." : stats.outOfStockProducts}</h3>
+              <h3 className="text-2xl font-bold text-gray-800">{stats.outOfStockProducts}</h3>
             </div>
           </div>
           <div className="mt-4 text-sm text-red-600">
@@ -996,7 +2245,7 @@ const Dashboard = () => {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Product Categories</h2>
           <div className="h-80">
             <Doughnut
-              data={categoryData}
+              data={productCategoryData}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
@@ -1016,197 +2265,15 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Second Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Recent Orders */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden lg:col-span-2">
-          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800">Recent Orders</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Order ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {recentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.customer}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.total.toFixed(2)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${
-                          order.status === "Completed"
-                            ? "bg-green-100 text-green-800"
-                            : order.status === "Processing"
-                              ? "bg-amber-100 text-amber-800"
-                              : order.status === "Shipped"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button className="text-indigo-600 hover:text-indigo-900 mr-3">
-                        <FaEye size={16} />
-                      </button>
-                      <button className="text-indigo-600 hover:text-indigo-900">
-                        <FaEdit size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 flex justify-center">
-            <button className="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center">
-              View all orders <FaAngleRight className="ml-1" />
-            </button>
-          </div>
-        </div>
-
-        {/* Order Status */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Order Status</h2>
-          <div className="h-52 mb-4">
-            <Doughnut
-              data={ordersData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: "right",
-                    labels: {
-                      boxWidth: 12,
-                      padding: 15,
-                    },
-                  },
-                },
-                cutout: "70%",
-              }}
-            />
-          </div>
-          <div className="space-y-2 text-sm text-gray-600">
-            <div className="flex justify-between">
-              <span>Completed Orders:</span>
-              <span className="font-medium">63</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Processing Orders:</span>
-              <span className="font-medium">15</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Shipped Orders:</span>
-              <span className="font-medium">12</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Cancelled Orders:</span>
-              <span className="font-medium">10</span>
-            </div>
-            <div className="flex justify-between font-semibold pt-2 border-t">
-              <span>Total Orders:</span>
-              <span>100</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Low Stock Products & Recent Additions */}
+      {/* Recent Products & Courses */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Low Stock Products */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-800">Low Stock Products</h2>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-              Attention Needed
-            </span>
-          </div>
-          {lowStockProducts.length > 0 ? (
-            <div className="divide-y divide-gray-200">
-              {lowStockProducts.map((product) => (
-                <div key={product._id} className="p-4 hover:bg-gray-50 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="h-10 w-10 flex-shrink-0">
-                      {product.imageUrl ? (
-                        <img
-                          src={product.imageUrl || "/placeholder.svg"}
-                          alt={product.title}
-                          className="h-10 w-10 rounded-md object-cover"
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded-md bg-gray-200 flex items-center justify-center">
-                          <span className="text-xs text-gray-500">No img</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-sm font-medium text-gray-900 line-clamp-1">{product.title}</h3>
-                      <p className="text-xs text-gray-500">Category: {product.category}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <span
-                      className={`px-2 py-1 rounded-md text-xs font-medium ${
-                        product.stock <= 5 ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"
-                      }`}
-                    >
-                      {product.stock} left in stock
-                    </span>
-                    <Link
-                      to={`/admin/products/edit/${product._id}`}
-                      className="ml-4 text-indigo-600 hover:text-indigo-900"
-                    >
-                      <FaEdit size={16} />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-6 text-center text-gray-500">No low stock products found.</div>
-          )}
-          {lowStockProducts.length > 0 && (
-            <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 flex justify-center">
-              <Link
-                to="/admin/products"
-                className="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center"
-              >
-                Manage inventory <FaAngleRight className="ml-1" />
-              </Link>
-            </div>
-          )}
-        </div>
-
         {/* Recent Products */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
             <h2 className="text-lg font-semibold text-gray-800">Recently Added Products</h2>
+            <Link to="/admin/products/add" className="text-indigo-600 hover:text-indigo-900 flex items-center text-sm">
+              <FaPlus className="mr-1" /> Add Product
+            </Link>
           </div>
           {recentProducts.length > 0 ? (
             <div className="divide-y divide-gray-200">
@@ -1247,13 +2314,62 @@ const Dashboard = () => {
           ) : (
             <div className="p-6 text-center text-gray-500">No products found.</div>
           )}
-          {recentProducts.length > 0 && (
+        </div>
+
+        {/* Recent Courses */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-gray-800">Recently Added Courses</h2>
+            <Link to="/admin/courses/add" className="text-indigo-600 hover:text-indigo-900 flex items-center text-sm">
+              <FaPlus className="mr-1" /> Add Course
+            </Link>
+          </div>
+          {recentCourses.length > 0 ? (
+            <div className="divide-y divide-gray-200">
+              {recentCourses.map((course) => (
+                <div key={course._id} className="p-4 hover:bg-gray-50 flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="h-10 w-10 flex-shrink-0">
+                      {course.imageUrl ? (
+                        <img
+                          src={course.imageUrl || "/placeholder.svg"}
+                          alt={course.title}
+                          className="h-10 w-10 rounded-md object-cover"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-md bg-indigo-100 flex items-center justify-center">
+                          <FaGraduationCap className="text-indigo-600" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="text-sm font-medium text-gray-900 line-clamp-1">{course.title}</h3>
+                      <p className="text-xs text-gray-500">
+                        ${course.price.toFixed(2)} - {course.category}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Link to={`/courses/${course._id}`} className="text-indigo-600 hover:text-indigo-900">
+                      <FaEye size={16} />
+                    </Link>
+                    <Link to={`/admin/courses/edit/${course._id}`} className="text-indigo-600 hover:text-indigo-900">
+                      <FaEdit size={16} />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-6 text-center text-gray-500">No courses found.</div>
+          )}
+          {recentCourses.length > 0 && (
             <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 flex justify-center">
               <Link
-                to="/admin/products/add"
+                to="/admin/courses"
                 className="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center"
               >
-                Add new product <FaAngleRight className="ml-1" />
+                View all courses <FaAngleRight className="ml-1" />
               </Link>
             </div>
           )}

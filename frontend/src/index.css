@@ -301,7 +301,6 @@ h6 {
   line-height: 1.2;
 }
 
-/* Custom animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -348,7 +347,6 @@ h6 {
   animation: pulse 2s infinite;
 }
 
-/* Staggered animations for lists */
 .staggered > *:nth-child(1) {
   animation-delay: 0.1s;
 }
@@ -374,7 +372,7 @@ h6 {
   animation-delay: 0.8s;
 }
 
-/* Custom utility classes */
+
 .card {
   @apply bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300;
 }
@@ -437,7 +435,6 @@ h6 {
   overflow: hidden;
 }
 
-/* Glass morphism effect */
 .glass {
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(4px);
