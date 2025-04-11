@@ -52,6 +52,20 @@ The application also includes an online courses marketplace, allowing users to b
 - Docker containerization
 - 12-factor app methodology
 
+# 🛒 Cart View
+- Displays items added by the user for purchase.
+![Cart View Screenshot](https://raw.githubusercontent.com/SumeetPatil24/shopping-kart/master/Cart.png)
+
+
+# 📚 Course List
+- Users can browse and explore a wide range of courses.
+![Course List Screenshot](https://raw.githubusercontent.com/SumeetPatil24/shopping-kart/master/CourseList.png)
+
+
+# 🎓 Course Enrollment
+- Enrolled courses are shown here with progress and details.
+![Enrolled Courses Screenshot](https://raw.githubusercontent.com/SumeetPatil24/shopping-kart/master/CourseEnroll.png)
+
 ## 💻 Technology Stack
 
 ### Frontend
@@ -353,4 +367,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-Developed with ❤️ by Sumeet Patil, YVDN Sathwik, Mohd. Arham, Shrinath
+Developed with ❤️ by Sumit Patil, Sathvik, Arham, Shreenath
